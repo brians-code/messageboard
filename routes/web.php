@@ -11,10 +11,9 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
 Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/', 'MessageController@index');
+Route::get('home', 'MessageController@index');
+Route::get('messages/delete/{id}', 'MessageController@delete');
+Route::resource('messages', 'MessageController');

@@ -48,9 +48,15 @@ class RegisterController extends Controller
      */
     protected function validator(array $data)
     {
+        $user = User::where('email', $data['email'])->whereNull('password')->first();
+        if(empty($user)) {
+            $email = ['required', 'string', 'email', 'max:255', 'unique:users'];
+        } else {
+            $email = ['required', 'string', 'email', 'max:255'];
+        }
         return Validator::make($data, [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'email' => $email,
             'password' => ['required', 'string', 'min:6', 'confirmed'],
         ]);
     }
@@ -63,10 +69,18 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        return User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-        ]);
+        $user = User::where('email', $data['email'])->first();
+        if(empty($user)) {
+            return User::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => Hash::make($data['password']),
+            ]);
+        } else if(empty($user->password)){
+            $user->name = $data['name'];
+            $user->password = Hash::make($data['password']);
+            $user->save();
+            return $user;
+        }
     }
 }
